@@ -1,5 +1,6 @@
 /* STUDENTS STUDY HUB - app.js
-   Part 1: foundation, login, home screen, countdown, admin customise. */
+   Part 1: foundation, login, home screen, countdown, admin customise.
+   Part 2: study-tool tiles on the home screen and page routing for the quiz and past papers (quiz.js). */
 
 const sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
 
@@ -20,7 +21,20 @@ let countdownTimer = null;
 const $ = (sel, root = document) => root.querySelector(sel);
 const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-function go(page) { state.page = page; render(); window.scrollTo(0, 0); }
+function go(page) {
+  // Leaving a running exam: stop its timer so it cannot jump the student to the results page later.
+  if (page !== "quizrun" && typeof stopQuizTimer === "function") stopQuizTimer();
+  state.page = page;
+  render();
+  window.scrollTo(0, 0);
+}
+
+// Same as go(), but asks first when a quiz is in progress (used by the logo/home button).
+function leaveTo(page) {
+  const running = state.page === "quizrun" && typeof QZ !== "undefined" && QZ.run && !QZ.run.done;
+  if (running && !confirm("Leave this quiz? Your answers so far will be lost.")) return;
+  go(page);
+}
 
 /* ---------- data loading ---------- */
 async function loadSettings() {
@@ -57,7 +71,7 @@ function renderHeader() {
     l.textContent = "";
     l.style.backgroundImage = `url("${s.logoUrl}")`;
   }
-  $("#btn-home").onclick = () => go("home");
+  $("#btn-home").onclick = () => leaveTo("home");
   if (state.user) {
     $("#btn-logout").onclick = () => sb.auth.signOut();
     $("#btn-profile").onclick = () => alert("The profile page arrives in the next update.");
@@ -83,7 +97,13 @@ function renderHome() {
     </section>
     <section class="card">
       <h2>Study tools</h2>
-      <p class="muted">Quiz, notes, past papers, leaderboard, friends and community are being added now. They will appear here.</p>
+      <div class="tiles">
+        <button class="tile" id="tile-quiz"><b>📝 Practice &amp; Exam</b><span>Quizzes by subject, class and topic</span></button>
+        <button class="tile" id="tile-papers"><b>📚 WAEC past papers</b><span>Browse by year and paper</span></button>
+        <div class="tile soon"><b>📒 Notes</b><span>Coming soon</span></div>
+        <div class="tile soon"><b>🏆 Leaderboard</b><span>Coming soon</span></div>
+        <div class="tile soon"><b>👥 Friends &amp; community</b><span>Coming soon</span></div>
+      </div>
     </section>
     <section class="card center">
       <p class="eyebrow">Launch countdown</p>
@@ -107,6 +127,8 @@ function renderHome() {
     img.src = s.photoUrl;
   }
   if (state.isAdmin) $("#btn-custom").onclick = openCustomize;
+  $("#tile-quiz").onclick = () => go("quiz");
+  $("#tile-papers").onclick = () => go("papers");
   startCountdown();
 }
 
@@ -263,7 +285,12 @@ function openCustomize() {
 /* ---------- start ---------- */
 function render() {
   renderHeader();
-  if (state.page === "home") renderHome();
+  const p = state.page;
+  if (p === "quiz") renderQuizSetup();
+  else if (p === "quizrun") renderQuizRun();
+  else if (p === "result") renderQuizResult();
+  else if (p === "papers") renderPapers();
+  else renderHome();
 }
 
 async function boot() {
@@ -272,6 +299,9 @@ async function boot() {
   render();
   sb.auth.onAuthStateChange((event, session) => {
     if (!["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"].includes(event)) return;
+    // The browser can re-announce the same signed-in user (for example when the tab regains focus).
+    // Ignore that so a quiz in progress is not redrawn for no reason.
+    if (event === "SIGNED_IN" && state.user && session && session.user && session.user.id === state.user.id) return;
     setTimeout(async () => { await loadUser(session ? session.user : null); render(); }, 0);
   });
 }
