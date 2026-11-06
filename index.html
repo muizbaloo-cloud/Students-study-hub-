@@ -12,8 +12,30 @@
 <body>
   <header id="topbar"></header>
   <main id="app"><p class="muted center">Loading…</p></main>
+
+  <!-- Script order matters. Each line only needs the ones above it. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
+
+  <!-- 1. Subjects, topics and the addQ() helper -->
+  <script src="data.js"></script>
+
+  <!-- 2. Written questions (they call addQ, so they come after data.js) -->
+  <script src="questions-old.js"></script>
+  <script src="questions-new1.js"></script>
+  <script src="questions-new2.js"></script>
+
+  <!-- 3. WAEC past papers (also adds the WAEC objectives to the question bank) -->
+  <script src="pastpapers.js"></script>
+
+  <!-- 4. Computed practice questions (gen.js first, gen2.js needs it) -->
+  <script src="gen.js"></script>
+  <script src="gen2.js"></script>
+
+  <!-- 5. Quiz and past-papers screens -->
+  <script src="quiz.js"></script>
+
+  <!-- 6. The app itself, last, because it starts running as soon as it loads -->
   <script src="app.js"></script>
 </body>
-  </html>
+</html>
