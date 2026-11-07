@@ -814,3 +814,52 @@ body {
 small {
   color:#647b9a;
 }
+/* QUIZ ANSWER ALIGNMENT FIX */
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.quiz-option {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 58px;
+  margin: 0;
+  padding: 13px 15px;
+  border: 1px solid #d7e4f4;
+  border-radius: 14px;
+  background: #fff;
+  color: #183858;
+  font-size: .97rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.quiz-option input[type="radio"] {
+  display: block;
+  width: 18px !important;
+  height: 18px;
+  min-width: 18px;
+  margin: 0 !important;
+  padding: 0 !important;
+  accent-color: #1674e8;
+}
+
+.quiz-option span {
+  display: block;
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.quiz-option:has(input:checked) {
+  border-color: #1674e8;
+  background: #eef6ff;
+}
