@@ -1600,7 +1600,11 @@ window.getRank = getRank;
   : "<section class='page-card'><h2>Student Study Hub</h2></section>";
 }
 
-    el.innerHTML = html;
+    el.innerHTML = html + (
+  S.page === "home" || S.page === "notes"
+    ? nav()
+    : ""
+);
   }
 
   window.render = renderPage;
