@@ -1591,14 +1591,14 @@ window.getRank = getRank;
       }
       return;
     } else if (S.page === "notes") {
-      html = typeof notesHTML === "function"
-        ? notesHTML()
-        : "<section class='page-card'><h2>Notes</h2></section>";
+      html = typeof window.notesHTML === "function"
+  ? window.notesHTML()
+  : "<section class='page-card'><h2>Notes</h2></section>";
     } else {
-      html = typeof homeHTML === "function"
-        ? homeHTML()
-        : "<section class='page-card'><h2>Student Study Hub</h2></section>";
-    }
+    html = typeof window.homeHTML === "function"
+  ? window.homeHTML()
+  : "<section class='page-card'><h2>Student Study Hub</h2></section>";
+}
 
     el.innerHTML = html;
   }
