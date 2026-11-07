@@ -1020,3 +1020,43 @@ small,
   padding: 6px 12px;
   font-weight: 650;
 }
+/* APPDEPLOY BOTTOM NAVIGATION */
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 6px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255,255,255,.97);
+  border-top: 1px solid #d7e4f4;
+  box-shadow: 0 -6px 24px rgba(16,40,77,.09);
+}
+
+.bottom-nav button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 3px;
+  background: transparent !important;
+  color: #647b9a !important;
+  border: 0 !important;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.bottom-nav button.active {
+  color: #1674e8 !important;
+  background: #eef6ff !important;
+}
+
+#app {
+  padding-bottom: 105px;
+}
