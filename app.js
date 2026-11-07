@@ -1623,8 +1623,15 @@ if (typeof window.checkAdmin === "function") {
   await window.checkAdmin();
 }
 
-    S.page = S.user ? "home" : "login";
-    await renderPage();
+      S.page = S.user ? "home" : "login";
+      await renderPage();
+    } catch (e) {
+      console.error("App startup failed:", e);
+      var el = document.getElementById("app");
+      if (el) {
+        el.innerHTML = "<p class='center'>App startup error. Please refresh.</p>";
+      }
+    }
   }
 
   if (sb) {
