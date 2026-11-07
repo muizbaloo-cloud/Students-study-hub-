@@ -1,18 +1,15 @@
 /* =========================================================
-   STUDENT STUDY HUB — data.js
-   Shared application data, XP, ranks, quiz messages,
-   subjects, levels, topics and question helpers.
+   STUDENT STUDY HUB — DATA
    ========================================================= */
 
-/* ---------- APP INFORMATION ---------- */
-
 window.APP_INFO = {
-  name: "Student Study Hub",
+  name: "STUDENT STUDY HUB",
   creator: "BALOGUN MUIZ",
   school: "ST PETER'S COLLEGE OLOMORE",
-  session: "2026/27 ACADEMIC SESSION"
+  session: "2026/27 ACADEMIC SESSION",
+  description:
+    "SS1–SS3 learning, practice, notes, formulas and past papers."
 };
-
 
 /* =========================================================
    SUBJECTS
@@ -31,6 +28,10 @@ window.SUBJECTS = [
   "Geography"
 ];
 
+/* =========================================================
+   LEVELS
+   ========================================================= */
+
 window.LEVELS = [
   "SS1",
   "SS2",
@@ -38,9 +39,8 @@ window.LEVELS = [
   "All SS levels"
 ];
 
-
 /* =========================================================
-   RANK SYSTEM
+   RANKS
    ========================================================= */
 
 window.RANKS = [
@@ -49,7 +49,7 @@ window.RANKS = [
     minXP: 0,
     maxXP: 99,
     icon: "🌱",
-    description: "You are just getting started. Keep learning!",
+    description: "You are just getting started.",
     colorClass: "rank-beginners"
   },
   {
@@ -57,7 +57,7 @@ window.RANKS = [
     minXP: 100,
     maxXP: 299,
     icon: "📘",
-    description: "You're building a strong learning habit.",
+    description: "Your learning journey is growing.",
     colorClass: "rank-intermediate"
   },
   {
@@ -65,15 +65,15 @@ window.RANKS = [
     minXP: 300,
     maxXP: 599,
     icon: "📚",
-    description: "You're becoming a serious learner!",
+    description: "You are becoming a serious learner.",
     colorClass: "rank-bookworm"
   },
   {
     name: "Elite",
     minXP: 600,
     maxXP: 999,
-    icon: "🏅",
-    description: "Your consistency is putting you among the best.",
+    icon: "🔥",
+    description: "Your performance is impressive.",
     colorClass: "rank-elite"
   },
   {
@@ -81,182 +81,29 @@ window.RANKS = [
     minXP: 1000,
     maxXP: Infinity,
     icon: "🧠",
-    description: "Outstanding! You've reached the highest rank.",
+    description: "Outstanding academic performance.",
     colorClass: "rank-genius"
   }
 ];
 
-
 /* =========================================================
-   XP VALUES
+   XP RULES
    ========================================================= */
 
 window.XP_RULES = {
-  correctPracticeAnswer: 5,
-  correctExamAnswer: 10,
-  completedPracticeQuiz: 10,
+  practiceCorrect: 5,
+  examCorrect: 10,
+  completedPractice: 10,
   completedExam: 20,
-  perfectQuizBonus: 25,
+  perfectBonus: 25,
   highScoreBonus: 15,
-  dailyLearningBonus: 10,
+  dailyLearning: 10,
   noteCompleted: 5,
   formulaStudied: 3
 };
 
-
 /* =========================================================
-   RANK HELPERS
-   ========================================================= */
-
-window.getRank = function (xp) {
-  xp = Number(xp) || 0;
-
-  for (let i = window.RANKS.length - 1; i >= 0; i--) {
-    if (xp >= window.RANKS[i].minXP) {
-      return window.RANKS[i];
-    }
-  }
-
-  return window.RANKS[0];
-};
-
-
-window.getNextRank = function (xp) {
-  xp = Number(xp) || 0;
-
-  for (let i = 0; i < window.RANKS.length; i++) {
-    if (xp < window.RANKS[i].minXP) {
-      return window.RANKS[i];
-    }
-  }
-
-  return null;
-};
-
-
-window.getRankProgress = function (xp) {
-  xp = Number(xp) || 0;
-
-  const current = window.getRank(xp);
-  const next = window.getNextRank(xp);
-
-  if (!next) {
-    return {
-      currentRank: current.name,
-      nextRank: null,
-      currentXP: xp,
-      neededXP: 0,
-      percentage: 100
-    };
-  }
-
-  const range = next.minXP - current.minXP;
-  const progress = xp - current.minXP;
-
-  return {
-    currentRank: current.name,
-    nextRank: next.name,
-    currentXP: xp,
-    neededXP: Math.max(0, next.minXP - xp),
-    percentage: Math.min(100, Math.max(0, (progress / range) * 100))
-  };
-};
-
-
-/* =========================================================
-   XP / RESULT MESSAGES
-   ========================================================= */
-
-window.getPerformanceMessage = function (percentage) {
-  percentage = Number(percentage) || 0;
-
-  if (percentage >= 90) {
-    return {
-      title: "Outstanding! 🔥",
-      message: "Excellent performance. You really know your stuff!",
-      type: "excellent"
-    };
-  }
-
-  if (percentage >= 75) {
-    return {
-      title: "Great Work! 👏",
-      message: "Very strong performance. Keep pushing!",
-      type: "great"
-    };
-  }
-
-  if (percentage >= 60) {
-    return {
-      title: "Good Job! 👍",
-      message: "You're making solid progress. Keep practising!",
-      type: "good"
-    };
-  }
-
-  if (percentage >= 40) {
-    return {
-      title: "Keep Going! 💪",
-      message: "You're getting there. Review the corrections and try again.",
-      type: "average"
-    };
-  }
-
-  return {
-    title: "Don't Give Up! 🌱",
-    message: "Every attempt is practice. Study the explanations and try again.",
-    type: "needs-improvement"
-  };
-};
-
-
-window.getXPMessage = function (xpEarned) {
-  xpEarned = Number(xpEarned) || 0;
-
-  if (xpEarned >= 50) {
-    return "Massive XP gain! You're on fire! 🔥";
-  }
-
-  if (xpEarned >= 30) {
-    return "Excellent XP gain! Keep climbing! 🚀";
-  }
-
-  if (xpEarned >= 15) {
-    return "Nice XP boost! 📈";
-  }
-
-  if (xpEarned > 0) {
-    return "Every point counts. Keep learning! ⭐";
-  }
-
-  return "Keep practising to start earning XP! 🌱";
-};
-
-
-window.getRankUpMessage = function (oldXP, newXP) {
-  const oldRank = window.getRank(oldXP);
-  const newRank = window.getRank(newXP);
-
-  if (oldRank.name === newRank.name) {
-    return null;
-  }
-
-  return {
-    oldRank: oldRank.name,
-    newRank: newRank.name,
-    title: "Rank Up! 🎉",
-    message:
-      "Congratulations! You have moved from " +
-      oldRank.name +
-      " to " +
-      newRank.name +
-      "!"
-  };
-};
-
-
-/* =========================================================
-   LEVEL / DIFFICULTY
+   DIFFICULTY
    ========================================================= */
 
 window.DIFFICULTIES = [
@@ -266,640 +113,460 @@ window.DIFFICULTIES = [
   "Very Hard"
 ];
 
+/* =========================================================
+   QUESTION COUNTS
+   ========================================================= */
+
 window.QUESTION_COUNTS = [
-  10,
-  20,
-  30,
-  40,
-  50,
-  60,
-  70,
-  80,
-  90,
-  100
+  10, 20, 30, 40, 50,
+  60, 70, 80, 90, 100
 ];
-
-window.EXAM_DURATIONS = [
-  10,
-  20,
-  30,
-  40,
-  50,
-  60,
-  70,
-  80,
-  90,
-  100
-];
-
 
 /* =========================================================
-   SUBJECT TOPICS
+   EXAM DURATIONS
+   ========================================================= */
+
+window.EXAM_DURATIONS = [
+  10, 20, 30, 40, 50,
+  60, 70, 80, 90, 100
+];
+
+/* =========================================================
+   TOPICS
    ========================================================= */
 
 window.TOPICS = {
+
   "Mathematics": [
     "Number Bases",
-    "Fractions, Decimals & Percentages",
-    "Approximation",
-    "Ratio & Proportion",
-    "Sets",
-    "Algebra",
-    "Linear Equations & Inequalities",
-    "Simultaneous Equations",
-    "Sequences & Series",
-    "Variation",
-    "Quadratic Equations",
-    "Indices & Logarithms",
+    "Fractions",
+    "Decimals",
+    "Percentages",
+    "Ratio and Proportion",
+    "Indices",
+    "Logarithms",
     "Surds",
-    "Trigonometry",
-    "Bearings & Distances",
-    "Coordinate Geometry",
-    "Mensuration",
-    "Circle Geometry",
-    "Vectors",
+    "Sets",
+    "Algebraic Expressions",
+    "Factorization",
+    "Linear Equations",
+    "Simultaneous Equations",
+    "Quadratic Equations",
+    "Inequalities",
+    "Sequences and Series",
+    "Variation",
+    "Functions",
     "Matrices",
-    "Calculus",
+    "Vectors",
+    "Trigonometry",
+    "Mensuration",
+    "Geometry",
+    "Coordinate Geometry",
     "Statistics",
     "Probability",
-    "Plane Geometry & Polygons",
-    "Mathematical Logic"
+    "Differentiation",
+    "Integration",
+    "Construction",
+    "Bearings"
   ],
 
   "English Language": [
+    "Comprehension",
+    "Summary",
+    "Vocabulary",
+    "Synonyms",
+    "Antonyms",
     "Grammar",
     "Parts of Speech",
-    "Nouns & Pronouns",
     "Tenses",
     "Concord",
-    "Clauses & Phrases",
+    "Sentence Structure",
+    "Question Tags",
     "Punctuation",
-    "Vocabulary",
-    "Synonyms & Antonyms",
-    "Idioms",
-    "Comprehension",
-    "Summary Writing",
-    "Sentence Completion",
+    "Figures of Speech",
     "Oral English",
+    "Word Stress",
+    "Vowel Sounds",
+    "Consonant Sounds",
     "Essay Writing",
-    "Formal & Informal Letters",
-    "Reports & Articles",
-    "Figures of Speech"
+    "Letter Writing",
+    "Article Writing",
+    "Report Writing",
+    "Speech Writing"
   ],
 
   "Physics": [
-    "Measurements & Units",
-    "Scalars & Vectors",
-    "Mechanics",
+    "Measurement",
+    "Scalars and Vectors",
     "Motion",
+    "Speed and Velocity",
+    "Acceleration",
     "Forces",
-    "Work Energy & Power",
-    "Simple Machines",
+    "Newton's Laws",
+    "Work Energy and Power",
+    "Machines",
     "Pressure",
+    "Density",
     "Heat",
-    "Gas Laws",
+    "Temperature",
     "Waves",
     "Sound",
     "Light",
+    "Reflection",
+    "Refraction",
     "Electricity",
+    "Current Electricity",
     "Magnetism",
     "Electromagnetic Induction",
+    "Simple Harmonic Motion",
+    "Gravitation",
     "Atomic Physics",
-    "Radioactivity",
-    "Modern Physics"
+    "Nuclear Physics"
   ],
 
   "Chemistry": [
-    "Matter & Separation Techniques",
+    "Matter",
+    "Measurement",
     "Atomic Structure",
-    "Chemical Bonding",
     "Periodic Table",
-    "Chemical Formulae & Equations",
+    "Chemical Bonding",
     "Mole Concept",
+    "Chemical Formulae",
+    "Chemical Equations",
     "Stoichiometry",
-    "Gas Laws",
-    "Acids Bases & Salts",
-    "Oxidation & Reduction",
-    "Rates of Reaction",
-    "Chemical Equilibrium",
+    "Acids Bases and Salts",
+    "pH",
+    "Redox Reactions",
     "Electrochemistry",
-    "Metals & Non-metals",
     "Organic Chemistry",
     "Hydrocarbons",
+    "Alkanes",
+    "Alkenes",
+    "Alkynes",
+    "Alcohols",
+    "Carboxylic Acids",
     "Polymers",
+    "Metals",
+    "Non-metals",
+    "Water",
+    "Air",
     "Environmental Chemistry"
   ],
 
   "Biology": [
     "Characteristics of Living Things",
-    "Cell Biology",
-    "Cell Division",
-    "Classification of Living Things",
+    "Cell Structure",
+    "Cell Functions",
     "Nutrition",
-    "Transport in Plants & Animals",
+    "Photosynthesis",
     "Respiration",
+    "Transport",
     "Excretion",
-    "Support & Movement",
-    "Nervous & Hormonal Coordination",
-    "Human Systems",
+    "Homeostasis",
+    "Support and Movement",
     "Reproduction",
+    "Growth",
     "Genetics",
     "Evolution",
     "Ecology",
+    "Food Chains",
+    "Food Webs",
+    "Population",
     "Adaptation",
-    "Conservation",
-    "Microorganisms & Disease"
+    "Classification",
+    "Microorganisms",
+    "Disease",
+    "Human Health",
+    "Plant Biology",
+    "Animal Biology"
   ],
 
   "Further Mathematics": [
-    "Number Systems",
     "Algebra",
     "Functions",
     "Polynomial Equations",
-    "Complex Numbers",
     "Matrices",
     "Determinants",
     "Vectors",
+    "Complex Numbers",
+    "Sequences",
+    "Series",
+    "Binomial Expansion",
     "Trigonometry",
     "Coordinate Geometry",
     "Differentiation",
     "Integration",
+    "Differential Equations",
     "Mechanics",
-    "Probability",
     "Statistics",
-    "Series"
+    "Probability",
+    "Linear Programming",
+    "Numerical Methods"
   ],
 
   "Computer Science": [
     "Computer Fundamentals",
-    "Hardware",
-    "Software",
+    "Computer Hardware",
+    "Computer Software",
+    "Operating Systems",
     "Data Representation",
     "Number Systems",
     "Algorithms",
-    "Flowcharts & Pseudocode",
+    "Flowcharts",
     "Programming",
-    "Boolean Logic",
-    "Operating Systems",
+    "Variables",
+    "Data Types",
+    "Control Structures",
+    "Arrays",
     "Databases",
-    "Networking",
-    "Internet & Web",
-    "Cybersecurity Basics",
-    "Systems Analysis",
-    "Spreadsheets"
+    "Computer Networks",
+    "Internet",
+    "Cybersecurity",
+    "Artificial Intelligence",
+    "Ethics"
   ],
 
   "Economics": [
     "Basic Economic Concepts",
-    "Demand & Supply",
+    "Scarcity",
+    "Choice",
+    "Opportunity Cost",
+    "Demand",
+    "Supply",
     "Elasticity",
     "Production",
     "Factors of Production",
-    "Cost & Revenue",
-    "Market Structures",
+    "Division of Labour",
+    "Market",
+    "Price Determination",
+    "Money",
+    "Banking",
+    "Inflation",
+    "Unemployment",
     "National Income",
-    "Money & Banking",
-    "Inflation & Unemployment",
+    "Economic Growth",
+    "Economic Development",
     "Public Finance",
     "International Trade",
-    "Economic Growth & Development",
-    "Population & Labour",
-    "Agriculture & Industry",
-    "Nigerian Economy"
+    "Population",
+    "Agriculture",
+    "Industry"
   ],
 
   "Government": [
-    "Meaning & Scope of Government",
+    "Meaning of Government",
+    "Political Concepts",
+    "Power and Authority",
     "Constitution",
-    "Citizenship",
-    "Political Socialisation",
+    "Rule of Law",
+    "Democracy",
     "Political Parties",
-    "Electoral Systems",
-    "Public Opinion",
     "Pressure Groups",
-    "Political Institutions",
+    "Elections",
+    "Electoral Systems",
     "Legislature",
     "Executive",
     "Judiciary",
-    "Public Administration",
-    "Local Government",
     "Federalism",
-    "Public Policy",
-    "Foreign Policy",
-    "International Organisations"
+    "Unitary System",
+    "Confederation",
+    "Local Government",
+    "Public Opinion",
+    "Citizenship",
+    "Human Rights",
+    "International Organizations",
+    "ECOWAS",
+    "African Union",
+    "United Nations"
   ],
 
   "Geography": [
-    "Map Reading",
-    "Scale & Bearings",
-    "Latitude & Longitude",
-    "Earth Structure",
-    "Rocks & Minerals",
-    "Weather & Climate",
-    "Weather Instruments",
-    "Geomorphology",
+    "The Solar System",
+    "The Earth",
+    "Latitude and Longitude",
+    "Maps",
+    "Scale",
+    "Relief",
+    "Weather",
+    "Climate",
+    "Rocks",
+    "Weathering",
+    "Erosion",
+    "Rivers",
     "Drainage",
-    "Soils & Vegetation",
+    "Vegetation",
+    "Soils",
     "Population",
     "Settlement",
+    "Migration",
     "Agriculture",
-    "Natural Resources",
-    "Industry & Transport",
-    "Environmental Issues",
-    "Map Interpretation",
-    "Nigeria & Africa"
+    "Industry",
+    "Transport",
+    "Trade",
+    "Resources",
+    "Environmental Issues"
   ]
 };
-
 
 /* =========================================================
    LEVEL-SPECIFIC TOPICS
    ========================================================= */
 
 window.LEVEL_TOPICS = {
+
   "Mathematics": {
     "SS1": [
       "Number Bases",
-      "Fractions, Decimals & Percentages",
-      "Approximation",
-      "Ratio & Proportion",
+      "Fractions",
+      "Decimals",
+      "Percentages",
+      "Ratio and Proportion",
+      "Indices",
       "Sets",
-      "Algebra",
-      "Linear Equations & Inequalities",
-      "Simultaneous Equations",
-      "Sequences & Series",
-      "Variation",
+      "Algebraic Expressions",
+      "Linear Equations",
+      "Geometry",
       "Mensuration",
-      "Plane Geometry & Polygons",
-      "Statistics",
-      "Probability"
+      "Statistics"
     ],
 
     "SS2": [
-      "Quadratic Equations",
-      "Indices & Logarithms",
+      "Logarithms",
       "Surds",
+      "Quadratic Equations",
+      "Simultaneous Equations",
+      "Sequences and Series",
+      "Variation",
       "Trigonometry",
-      "Bearings & Distances",
       "Coordinate Geometry",
-      "Circle Geometry",
-      "Plane Geometry & Polygons",
-      "Mathematical Logic",
-      "Mensuration",
-      "Vectors",
-      "Matrices",
-      "Statistics",
-      "Probability"
+      "Probability",
+      "Statistics"
     ],
 
     "SS3": [
       "Quadratic Equations",
-      "Indices & Logarithms",
-      "Trigonometry",
-      "Coordinate Geometry",
-      "Mensuration",
-      "Circle Geometry",
-      "Vectors",
+      "Inequalities",
       "Matrices",
-      "Calculus",
-      "Statistics",
-      "Probability"
-    ]
-  },
-
-  "English Language": {
-    "SS1": [
-      "Parts of Speech",
-      "Nouns & Pronouns",
-      "Tenses",
-      "Concord",
-      "Clauses & Phrases",
-      "Punctuation",
-      "Vocabulary",
-      "Synonyms & Antonyms",
-      "Comprehension",
-      "Essay Writing",
-      "Oral English"
-    ],
-
-    "SS2": [
-      "Grammar",
-      "Tenses",
-      "Concord",
-      "Vocabulary",
-      "Synonyms & Antonyms",
-      "Idioms",
-      "Comprehension",
-      "Summary Writing",
-      "Sentence Completion",
-      "Oral English",
-      "Formal & Informal Letters",
-      "Figures of Speech"
-    ],
-
-    "SS3": [
-      "Grammar",
-      "Concord",
-      "Vocabulary",
-      "Comprehension",
-      "Summary Writing",
-      "Essay Writing",
-      "Formal & Informal Letters",
-      "Reports & Articles",
-      "Oral English",
-      "Figures of Speech"
+      "Vectors",
+      "Trigonometry",
+      "Mensuration",
+      "Geometry",
+      "Differentiation",
+      "Integration",
+      "Probability",
+      "Statistics"
     ]
   },
 
   "Physics": {
     "SS1": [
-      "Measurements & Units",
-      "Scalars & Vectors",
-      "Mechanics",
+      "Measurement",
+      "Scalars and Vectors",
       "Motion",
+      "Speed and Velocity",
+      "Acceleration",
       "Forces",
-      "Work Energy & Power",
-      "Simple Machines",
-      "Pressure",
-      "Heat"
+      "Work Energy and Power",
+      "Machines",
+      "Pressure"
     ],
 
     "SS2": [
-      "Motion",
-      "Forces",
       "Heat",
-      "Gas Laws",
+      "Temperature",
       "Waves",
       "Sound",
       "Light",
-      "Electricity",
-      "Magnetism"
+      "Reflection",
+      "Refraction",
+      "Electricity"
     ],
 
     "SS3": [
-      "Waves",
-      "Sound",
-      "Light",
-      "Electricity",
+      "Current Electricity",
       "Magnetism",
       "Electromagnetic Induction",
+      "Gravitation",
       "Atomic Physics",
-      "Radioactivity",
-      "Modern Physics"
+      "Nuclear Physics"
     ]
   },
 
   "Chemistry": {
     "SS1": [
-      "Matter & Separation Techniques",
+      "Matter",
+      "Measurement",
       "Atomic Structure",
-      "Chemical Bonding",
       "Periodic Table",
-      "Chemical Formulae & Equations",
-      "Mole Concept"
+      "Chemical Bonding",
+      "Chemical Formulae",
+      "Chemical Equations"
     ],
 
     "SS2": [
       "Mole Concept",
       "Stoichiometry",
-      "Gas Laws",
-      "Acids Bases & Salts",
-      "Oxidation & Reduction",
-      "Rates of Reaction",
-      "Chemical Equilibrium",
-      "Metals & Non-metals"
+      "Acids Bases and Salts",
+      "pH",
+      "Redox Reactions",
+      "Electrochemistry"
     ],
 
     "SS3": [
       "Organic Chemistry",
       "Hydrocarbons",
+      "Alkanes",
+      "Alkenes",
+      "Alkynes",
+      "Alcohols",
+      "Carboxylic Acids",
       "Polymers",
-      "Electrochemistry",
-      "Stoichiometry",
-      "Environmental Chemistry",
-      "Chemical Equilibrium"
+      "Metals",
+      "Environmental Chemistry"
     ]
   },
 
   "Biology": {
     "SS1": [
       "Characteristics of Living Things",
-      "Cell Biology",
-      "Cell Division",
-      "Classification of Living Things",
+      "Cell Structure",
+      "Cell Functions",
       "Nutrition",
-      "Transport in Plants & Animals",
+      "Photosynthesis",
       "Respiration"
     ],
 
     "SS2": [
-      "Transport in Plants & Animals",
-      "Respiration",
+      "Transport",
       "Excretion",
-      "Support & Movement",
-      "Nervous & Hormonal Coordination",
-      "Human Systems",
+      "Homeostasis",
+      "Support and Movement",
       "Reproduction",
-      "Ecology"
+      "Growth"
     ],
 
     "SS3": [
-      "Reproduction",
       "Genetics",
       "Evolution",
       "Ecology",
+      "Food Chains",
+      "Food Webs",
       "Adaptation",
-      "Conservation",
-      "Microorganisms & Disease"
-    ]
-  },
-
-  "Further Mathematics": {
-    "SS1": [
-      "Number Systems",
-      "Algebra",
-      "Functions",
-      "Polynomial Equations",
-      "Trigonometry",
-      "Coordinate Geometry"
-    ],
-
-    "SS2": [
-      "Complex Numbers",
-      "Matrices",
-      "Determinants",
-      "Vectors",
-      "Trigonometry",
-      "Mechanics",
-      "Probability",
-      "Statistics"
-    ],
-
-    "SS3": [
-      "Matrices",
-      "Vectors",
-      "Differentiation",
-      "Integration",
-      "Mechanics",
-      "Probability",
-      "Statistics",
-      "Series"
-    ]
-  },
-
-  "Computer Science": {
-    "SS1": [
-      "Computer Fundamentals",
-      "Hardware",
-      "Software",
-      "Data Representation",
-      "Number Systems",
-      "Operating Systems",
-      "Spreadsheets"
-    ],
-
-    "SS2": [
-      "Algorithms",
-      "Flowcharts & Pseudocode",
-      "Programming",
-      "Boolean Logic",
-      "Databases",
-      "Networking",
-      "Internet & Web"
-    ],
-
-    "SS3": [
-      "Algorithms",
-      "Programming",
-      "Databases",
-      "Networking",
-      "Cybersecurity Basics",
-      "Systems Analysis",
-      "Spreadsheets"
-    ]
-  },
-
-  "Economics": {
-    "SS1": [
-      "Basic Economic Concepts",
-      "Demand & Supply",
-      "Elasticity",
-      "Production",
-      "Factors of Production",
-      "Cost & Revenue"
-    ],
-
-    "SS2": [
-      "Market Structures",
-      "Money & Banking",
-      "Inflation & Unemployment",
-      "Public Finance",
-      "International Trade",
-      "Agriculture & Industry"
-    ],
-
-    "SS3": [
-      "National Income",
-      "Market Structures",
-      "Money & Banking",
-      "Economic Growth & Development",
-      "Population & Labour",
-      "Nigerian Economy"
-    ]
-  },
-
-  "Government": {
-    "SS1": [
-      "Meaning & Scope of Government",
-      "Constitution",
-      "Citizenship",
-      "Political Socialisation",
-      "Political Parties"
-    ],
-
-    "SS2": [
-      "Electoral Systems",
-      "Public Opinion",
-      "Pressure Groups",
-      "Political Institutions",
-      "Legislature",
-      "Executive",
-      "Judiciary",
-      "Federalism"
-    ],
-
-    "SS3": [
-      "Public Administration",
-      "Local Government",
-      "Federalism",
-      "Public Policy",
-      "Foreign Policy",
-      "International Organisations",
-      "Constitution"
-    ]
-  },
-
-  "Geography": {
-    "SS1": [
-      "Map Reading",
-      "Scale & Bearings",
-      "Latitude & Longitude",
-      "Earth Structure",
-      "Rocks & Minerals",
-      "Weather & Climate",
-      "Weather Instruments"
-    ],
-
-    "SS2": [
-      "Geomorphology",
-      "Drainage",
-      "Soils & Vegetation",
-      "Population",
-      "Settlement",
-      "Agriculture",
-      "Natural Resources",
-      "Industry & Transport"
-    ],
-
-    "SS3": [
-      "Natural Resources",
-      "Geomorphology",
-      "Environmental Issues",
-      "Map Interpretation",
-      "Nigeria & Africa",
-      "Weather & Climate",
-      "Population"
+      "Disease",
+      "Human Health"
     ]
   }
 };
 
-
 /* =========================================================
-   QUESTION BANK COMPATIBILITY
+   QUESTION BANK
    ========================================================= */
-
-/*
-   Keep the existing question files compatible.
-
-   We do NOT replace:
-   questions-old.js
-   questions-new1.js
-   questions-new2.js
-   pastpapers.js
-   gen.js
-   gen2.js
-
-   They can continue loading their own question arrays.
-*/
 
 window.QBANK = window.QBANK || [];
 
-
-/*
-   Helper for adding questions programmatically.
-
-   Existing question-generation files can continue using this.
-*/
+/* =========================================================
+   QUESTION CREATOR
+   ========================================================= */
 
 window.addQ = function (
   subject,
@@ -908,103 +575,309 @@ window.addQ = function (
   question,
   options,
   answer,
-  explanation,
-  extra
+  explanation = "",
+  extra = {}
 ) {
-  const item = Object.assign(
-    {
-      id: "q-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
-      subject: subject,
-      level: level,
-      topic: topic,
-      exam: "Practice",
-      year: "",
-      q: question,
-      question: question,
-      options: Array.isArray(options) ? options : [],
-      answer: answer,
-      explanation: explanation || "",
-      difficulty: "Medium"
-    },
-    extra || {}
-  );
+  const item = {
+    id:
+      extra.id ||
+      `q_${Date.now()}_${Math.random()
+        .toString(36)
+        .slice(2, 8)}`,
+
+    subject,
+    level:
+      level || "All SS levels",
+
+    topic:
+      topic || "General",
+
+    exam:
+      extra.exam || "Practice",
+
+    year:
+      extra.year || null,
+
+    paper:
+      extra.paper || "Paper 1",
+
+    question,
+
+    q: question,
+
+    options:
+      Array.isArray(options)
+        ? options
+        : [],
+
+    answer,
+
+    explanation:
+      explanation || "",
+
+    difficulty:
+      extra.difficulty || "Medium",
+
+    diagram:
+      extra.diagram || null,
+
+    diagramUrl:
+      extra.diagramUrl || null,
+
+    imageUrl:
+      extra.imageUrl || null,
+
+    inPastPaper:
+      Boolean(extra.inPastPaper),
+
+    inQuiz:
+      extra.inQuiz !== false
+  };
 
   window.QBANK.push(item);
 
   return item;
 };
 
-
 /* =========================================================
-   UTILITY HELPERS
+   TOPIC HELPERS
    ========================================================= */
 
-window.getTopicsForLevel = function (subject, level) {
+window.getTopicsForLevel = function (
+  subject,
+  level
+) {
+  if (!subject) return [];
+
   if (
     level &&
     level !== "All SS levels" &&
-    window.LEVEL_TOPICS[subject] &&
-    window.LEVEL_TOPICS[subject][level]
+    window.LEVEL_TOPICS?.[subject]?.[level]
   ) {
     return window.LEVEL_TOPICS[subject][level];
   }
 
-  return window.TOPICS[subject] || [];
+  return window.TOPICS?.[subject] || [];
 };
 
-
-window.getSubjectCount = function (subject) {
-  if (!subject) return 0;
-
-  return window.QBANK.filter(function (question) {
-    return question.subject === subject;
-  }).length;
+window.getSubjectCount = function (
+  subject
+) {
+  return window.QBANK.filter(
+    q => q.subject === subject
+  ).length;
 };
 
-
-window.getTopicCount = function (subject, topic) {
-  if (!subject || !topic) return 0;
-
-  return window.QBANK.filter(function (question) {
-    return (
-      question.subject === subject &&
-      question.topic === topic
-    );
-  }).length;
+window.getTopicCount = function (
+  subject,
+  topic
+) {
+  return window.QBANK.filter(
+    q =>
+      q.subject === subject &&
+      q.topic === topic
+  ).length;
 };
-
 
 /* =========================================================
-   QUIZ XP CALCULATOR
+   RANK HELPERS
    ========================================================= */
 
-window.calculateQuizXP = function ({
-  correct = 0,
-  total = 0,
-  mode = "practice",
-  completed = true
-} = {}) {
+window.getRank = function (xp) {
+  xp = Number(xp) || 0;
 
-  correct = Number(correct) || 0;
-  total = Number(total) || 0;
+  for (let i = window.RANKS.length - 1; i >= 0; i--) {
+    const rank = window.RANKS[i];
 
-  if (!completed || total <= 0) {
-    return 0;
+    if (xp >= rank.minXP) {
+      return rank;
+    }
   }
 
-  const rule =
+  return window.RANKS[0];
+};
+
+window.getNextRank = function (xp) {
+  xp = Number(xp) || 0;
+
+  for (const rank of window.RANKS) {
+    if (xp < rank.minXP) {
+      return rank;
+    }
+  }
+
+  return null;
+};
+
+window.getRankProgress = function (xp) {
+  xp = Number(xp) || 0;
+
+  const current =
+    window.getRank(xp);
+
+  const next =
+    window.getNextRank(xp);
+
+  if (!next) {
+    return {
+      percentage: 100,
+      currentRank: current,
+      nextRank: null,
+      neededXP: 0
+    };
+  }
+
+  const range =
+    next.minXP - current.minXP;
+
+  const progress =
+    xp - current.minXP;
+
+  return {
+    percentage:
+      Math.max(
+        0,
+        Math.min(
+          100,
+          (progress / range) * 100
+        )
+      ),
+
+    currentRank: current,
+
+    nextRank: next.name,
+
+    neededXP:
+      Math.max(
+        0,
+        next.minXP - xp
+      )
+  };
+};
+
+/* =========================================================
+   PERFORMANCE MESSAGES
+   ========================================================= */
+
+window.getPerformanceMessage =
+  function (percentage) {
+    percentage =
+      Number(percentage) || 0;
+
+    if (percentage >= 90) {
+      return "Excellent! You really know your stuff. 🔥";
+    }
+
+    if (percentage >= 75) {
+      return "Great work! Keep pushing. 💪";
+    }
+
+    if (percentage >= 60) {
+      return "Good effort. A little more revision will help.";
+    }
+
+    if (percentage >= 40) {
+      return "You're improving. Review the questions you missed.";
+    }
+
+    return "Don't give up. Study the topic and try again. 🌱";
+  };
+
+window.getXPMessage =
+  function (xp) {
+    return `You earned ${Number(xp) || 0} XP!`;
+  };
+
+window.getRankUpMessage =
+  function (oldXP, newXP) {
+    const oldRank =
+      window.getRank(oldXP);
+
+    const newRank =
+      window.getRank(newXP);
+
+    if (
+      oldRank.name !== newRank.name
+    ) {
+      return {
+        title: "🎉 RANK UP!",
+        message:
+          `You are now ${newRank.name}!`
+      };
+    }
+
+    return null;
+  };
+
+/* =========================================================
+   QUIZ XP
+   ========================================================= */
+
+window.calculateQuizXP = function (
+  correct,
+  total,
+  mode = "practice"
+) {
+  correct =
+    Math.max(
+      0,
+      Number(correct) || 0
+    );
+
+  total =
+    Math.max(
+      0,
+      Number(total) || 0
+    );
+
+  const rules =
+    window.XP_RULES;
+
+  const perQuestion =
     mode === "exam"
-      ? window.XP_RULES.correctExamAnswer
-      : window.XP_RULES.correctPracticeAnswer;
+      ? rules.examCorrect
+      : rules.practiceCorrect;
 
-  let xp = correct * rule;
+  let xp =
+    correct * perQuestion;
 
-  if (mode === "exam") {
-    xp += window.XP_RULES.completedExam;
-  } else {
-    xp += window.XP_RULES.completedPracticeQuiz;
+  if (total > 0 && correct === total) {
+    xp += rules.perfectBonus;
   }
 
-  const percentage = (correct / total) * 100;
+  if (
+    total > 0 &&
+    correct / total >= 0.8
+  ) {
+    xp += rules.highScoreBonus;
+  }
 
-  if (percentage 
+  xp +=
+    mode === "exam"
+      ? rules.completedExam
+      : rules.completedPractice;
+
+  return xp;
+};
+
+/* =========================================================
+   APP METADATA
+   ========================================================= */
+
+window.STUDENT_STUDY_HUB = {
+  version: "2.0",
+  name: "STUDENT STUDY HUB",
+  creator: "BALOGUN MUIZ",
+  school: "ST PETER'S COLLEGE OLOMORE",
+  session: "2026/27 ACADEMIC SESSION"
+};
+
+/* Compatibility aliases */
+window.SSH = window.STUDENT_STUDY_HUB;
+window.APP_DATA = window.STUDENT_STUDY_HUB;
+
+console.log(
+  "Student Study Hub data loaded:",
+  window.QBANK.length,
+  "questions currently registered."
+); 
