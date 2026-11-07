@@ -863,3 +863,65 @@ small {
   border-color: #1674e8;
   background: #eef6ff;
 }
+/* APPDEPLOY LIGHT THEME */
+
+html {
+  background: #edf4ff;
+}
+
+body {
+  background: linear-gradient(
+    180deg,
+    #edf4ff 0%,
+    #f7faff 48%,
+    #edf4ff 100%
+  ) !important;
+  color: #10284d !important;
+}
+
+#topbar {
+  background: rgba(255,255,255,.96);
+  border-bottom: 1px solid #dbe6f5;
+  box-shadow: 0 3px 14px rgba(16,40,77,.04);
+}
+
+.card {
+  background: #fff;
+  color: #10284d;
+  border: 1px solid #dce7f5;
+  border-radius: 18px;
+  box-shadow: 0 7px 22px rgba(16,40,77,.055);
+}
+
+.muted,
+small,
+.small {
+  color: #647b9a;
+}
+
+.chip {
+  background: #eaf3ff;
+  color: #15549a;
+}
+
+.seg button {
+  background: #f7faff;
+  color: #164477;
+  border-color: #d7e4f4;
+}
+
+.seg button.on {
+  background: #eaf3ff;
+  border-color: #1674e8;
+  color: #0b4b91;
+}
+
+@media (max-width: 600px) {
+  #app {
+    padding: 14px 12px 108px;
+  }
+
+  .card {
+    padding: 15px;
+  }
+}
