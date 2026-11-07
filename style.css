@@ -710,29 +710,55 @@ a:focus-visible {
   color:#10284d;
 }
 /* APPDEPLOY BUTTON THEME */
+
 button,
 .btn {
-  border-radius:12px;
-  transition:background .2s ease,transform .2s ease;
-}
-
-button:not(.dark),
-.btn:not(.dark) {
-  background:#1674e8;
-  color:#ffffff;
-  border:1px solid #1674e8;
-}
-
-button.dark,
-.btn.dark {
-  background:#06264d;
-  color:#ffffff;
-  border:1px solid #06264d;
+  border-radius: 12px;
+  font-weight: 650;
+  transition: background .2s ease, transform .2s ease;
+  cursor: pointer;
 }
 
 button:active,
 .btn:active {
-  transform:scale(.98);
+  transform: scale(.98);
+}
+
+/* Default buttons */
+.btn {
+  background: #ffffff;
+  color: #10284d;
+  border: 1px solid #d7e4f4;
+}
+
+/* Main action buttons */
+.btn.primary,
+.primary-btn {
+  background: #1674e8;
+  color: #ffffff;
+  border: 1px solid #1674e8;
+}
+
+/* Transparent buttons */
+.btn.ghost {
+  background: transparent;
+  color: #1674e8;
+  border: 1px solid #cbd9eb;
+}
+
+/* Dark buttons */
+.btn.dark {
+  background: #06264d;
+  color: #ffffff;
+  border: 1px solid #06264d;
+}
+
+/* Danger buttons */
+.btn.danger,
+.danger-btn {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
 }
 /* APPDEPLOY INPUT THEME */
 input,
