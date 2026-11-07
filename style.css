@@ -795,3 +795,22 @@ select:focus {
 .bottom-nav button:hover {
   color:#1674e8 !important;
 }
+/* BOTTOM NAV CONTENT SPACING */
+body {
+  background:#edf4ff !important;
+  color:#10284d !important;
+  padding-bottom:90px;
+}
+
+.page-card {
+  background:#ffffff;
+  color:#10284d;
+  border:1px solid #d7e4f4;
+  border-radius:20px;
+  box-shadow:0 5px 18px rgba(16,40,77,.06);
+}
+
+.muted,
+small {
+  color:#647b9a;
+}
