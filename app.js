@@ -1613,20 +1613,15 @@ window.getRank = getRank;
 
   async function boot() {
     try {
-      if (typeof loadUser === "function") {
-        await loadUser();
-      }
-
-      if (typeof loadProfile === "function") {
-        await loadProfile();
-      }
-
-      if (typeof checkAdmin === "function") {
-        await checkAdmin();
-      }
-    } catch (e) {
-      console.error("App startup error:", e);
-    }
+  if (typeof window.loadUser === "function") {
+  await window.loadUser();
+}
+if (typeof window.loadProfile === "function") {
+  await window.loadProfile();
+}
+if (typeof window.checkAdmin === "function") {
+  await window.checkAdmin();
+}
 
     S.page = S.user ? "home" : "login";
     await renderPage();
