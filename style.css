@@ -925,3 +925,40 @@ small,
     padding: 15px;
   }
 }
+/* APPDEPLOY HERO DESIGN */
+
+.hero {
+  background: linear-gradient(
+    125deg,
+    #06264d 0%,
+    #0a4b91 60%,
+    #167ee5 100%
+  );
+  color: #fff;
+  border-radius: 22px;
+  padding: 26px 22px;
+  box-shadow: 0 10px 25px rgba(6,38,77,.16);
+}
+
+.hero h1,
+.hero p,
+.hero h2 {
+  color: #fff;
+}
+
+.hero h1 {
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.hero p {
+  line-height: 1.6;
+  opacity: .92;
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 22px 17px;
+    border-radius: 19px;
+  }
+}
