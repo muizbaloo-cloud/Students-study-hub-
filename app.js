@@ -1646,4 +1646,4 @@ if (typeof window.checkAdmin === "function") {
     boot();
   }
 
-})();
+})(;
