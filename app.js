@@ -709,7 +709,13 @@
 
     window.render();
   };
-
+  // Share Part 1 functions with the other app sections
+  window.loadUser = loadUser;
+  window.loadProfile = loadProfile;
+  window.checkAdmin = checkAdmin;
+  window.loginHTML = loginHTML;
+  window.homeHTML = homeHTML;
+  window.notesHTML = notesHTML;
 })();
 /* STUDENT STUDY HUB — APP.JS PART 2A */
 (function () {
