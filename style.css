@@ -962,3 +962,35 @@ small,
     border-radius: 19px;
   }
 }
+/* APPDEPLOY CARD DESIGN */
+
+.card {
+  background: #ffffff;
+  border: 1px solid #dce7f5;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 7px 22px rgba(16,40,77,.055);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.card h2,
+.card h3 {
+  color: #10284d;
+  font-weight: 750;
+}
+
+.card p {
+  color: #647b9a;
+  line-height: 1.6;
+}
+
+.card:active {
+  transform: scale(.99);
+}
+
+.chip {
+  border-radius: 30px;
+  padding: 6px 12px;
+  font-weight: 650;
+}
