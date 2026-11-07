@@ -687,7 +687,7 @@
     if (!sb || !S.user) return;
 
     var input =
-      document.getElementById("newProfileName");
+      document.getElementById("my-name");
 
     if (!input || !input.value.trim()) return;
 
