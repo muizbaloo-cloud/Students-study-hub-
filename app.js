@@ -716,6 +716,7 @@
   window.loginHTML = loginHTML;
   window.homeHTML = homeHTML;
   window.notesHTML = notesHTML;
+window.getRank = getRank;
 })();
 /* STUDENT STUDY HUB — APP.JS PART 2A */
 (function () {
@@ -1521,13 +1522,13 @@
     var el = document.getElementById("app");
     if (!el) return;
 
-    if (!S.user) {
-      S.page = "login";
-      el.innerHTML = typeof loginHTML === "function"
-        ? loginHTML()
-        : "<section class='page-card'>Please log in.</section>";
-      return;
-    }
+   if (!S.user) {
+  S.page = "login";
+  el.innerHTML = typeof window.loginHTML === "function"
+    ? window.loginHTML()
+    : "<section class='page-card'>Please log in.</section>";
+  return;
+}
 
     var html = "";
 
