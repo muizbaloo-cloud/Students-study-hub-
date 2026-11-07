@@ -684,3 +684,28 @@ a:focus-visible {
     animation-duration: .01ms !important;
   }
 }
+/* APPDEPLOY LIGHT CARD THEME */
+.card,
+.tile,
+.note-card,
+.topic-card,
+.formula-card,
+.friend-card,
+.community-card,
+.admin-panel,
+.settings-panel {
+  background:#ffffff !important;
+  color:#10284d !important;
+  border:1px solid #d7e4f4 !important;
+  border-radius:18px;
+  box-shadow:0 5px 18px rgba(16,40,77,.06);
+}
+
+.card p,
+.card h2,
+.card h3,
+.tile,
+.note-card,
+.topic-card {
+  color:#10284d;
+}
