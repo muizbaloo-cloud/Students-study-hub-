@@ -709,3 +709,28 @@ a:focus-visible {
 .topic-card {
   color:#10284d;
 }
+/* APPDEPLOY BUTTON THEME */
+button,
+.btn {
+  border-radius:12px;
+  transition:background .2s ease,transform .2s ease;
+}
+
+button:not(.dark),
+.btn:not(.dark) {
+  background:#1674e8;
+  color:#ffffff;
+  border:1px solid #1674e8;
+}
+
+button.dark,
+.btn.dark {
+  background:#06264d;
+  color:#ffffff;
+  border:1px solid #06264d;
+}
+
+button:active,
+.btn:active {
+  transform:scale(.98);
+}
