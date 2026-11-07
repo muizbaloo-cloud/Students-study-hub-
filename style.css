@@ -734,3 +734,24 @@ button:active,
 .btn:active {
   transform:scale(.98);
 }
+/* APPDEPLOY INPUT THEME */
+input,
+textarea,
+select {
+  background:#ffffff !important;
+  color:#10284d !important;
+  border:1px solid #cbd9eb !important;
+  border-radius:12px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color:#8496ae;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline:2px solid rgba(22,116,232,.2);
+  border-color:#1674e8 !important;
+}
