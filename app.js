@@ -1,22 +1,9 @@
 /* =========================================================
    STUDENT STUDY HUB — app.js
-   VERSION 2.0
-
-   Main application controller:
-   - Supabase connection
-   - Authentication
-   - Profiles
-   - XP + rank system
-   - Home dashboard
-   - Notes
-   - Formula library
-   - Leaderboard
-   - Friends/community foundation
-   - Admin customization
-   - Quiz / exam routing
-   - WAEC past-paper routing
+   STABLE FRONTEND CONTROLLER
    ========================================================= */
 
+"use strict";
 
 /* =========================================================
    SUPABASE
@@ -27,9 +14,8 @@ const sb = supabase.createClient(
   window.SUPABASE_KEY
 );
 
-
 /* =========================================================
-   DEFAULT APP SETTINGS
+   DEFAULT SETTINGS
    ========================================================= */
 
 const DEFAULTS = {
@@ -45,9 +31,8 @@ const DEFAULTS = {
   photoUrl: ""
 };
 
-
 /* =========================================================
-   GLOBAL APP STATE
+   STATE
    ========================================================= */
 
 const state = {
@@ -77,32 +62,26 @@ const state = {
   friends: [],
 
   selectedSubject: "",
-
   selectedLevel: "",
-
   selectedTopic: ""
 };
 
-
 let countdownTimer = null;
 
-
 /* =========================================================
-   SMALL HELPERS
+   HELPERS
    ========================================================= */
 
 const $ = (selector, root = document) =>
   root.querySelector(selector);
 
-
 const $$ = (selector, root = document) =>
   [...root.querySelectorAll(selector)];
 
-
-const esc = (value) =>
-  String(value ?? "").replace(
+function esc(value) {
+  return String(value ?? "").replace(
     /[&<>"']/g,
-    (char) =>
+    char =>
       ({
         "&": "&amp;",
         "<": "&lt;",
@@ -111,25 +90,45 @@ const esc = (value) =>
         "'": "&#39;"
       })[char]
   );
-
+}
 
 function safeNumber(value, fallback = 0) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
 }
 
+function showError(message) {
+  console.error(message);
+
+  const app = $("#app");
+
+  if (app) {
+    app.innerHTML = `
+      <section class="card center">
+        <h2>Student Study Hub</h2>
+        <p class="alert">${esc(message)}</p>
+        <button class="btn primary" onclick="location.reload()">
+          Reload app
+        </button>
+      </section>
+    `;
+  }
+}
 
 /* =========================================================
    NAVIGATION
    ========================================================= */
 
 function go(page) {
-
   if (
     page !== "quizrun" &&
     typeof stopQuizTimer === "function"
   ) {
-    stopQuizTimer();
+    try {
+      stopQuizTimer();
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
   state.page = page;
@@ -142,9 +141,7 @@ function go(page) {
   });
 }
 
-
 function leaveTo(page) {
-
   const running =
     state.page === "quizrun" &&
     typeof QZ !== "undefined" &&
@@ -163,15 +160,12 @@ function leaveTo(page) {
   go(page);
 }
 
-
 /* =========================================================
-   DATABASE SETTINGS
+   SETTINGS
    ========================================================= */
 
 async function loadSettings() {
-
   try {
-
     const { data, error } = await sb
       .from("app_settings")
       .select("value")
@@ -182,88 +176,54 @@ async function loadSettings() {
 
     state.settings = {
       ...DEFAULTS,
-      ...(data && data.value ? data.value : {})
+      ...(data?.value || {})
     };
 
     state.dbError = "";
-
   } catch (error) {
-
-    console.warn("Settings could not be loaded:", error);
+    console.warn("Settings load failed:", error);
 
     state.settings = {
       ...DEFAULTS
     };
 
     state.dbError =
-      "Some online settings could not be loaded.";
+      "Online settings could not be loaded. Default settings are being used.";
   }
 }
-
 
 /* =========================================================
    USER / PROFILE
    ========================================================= */
 
 async function loadUser(user) {
-
   state.user = user;
   state.profile = null;
   state.isAdmin = false;
   state.studentXP = 0;
 
   if (!user) {
-
-    state.rank =
-      window.getRank
-        ? window.getRank(0)
-        : state.rank;
+    state.rank = window.getRank
+      ? window.getRank(0)
+      : state.rank;
 
     return;
   }
 
-
   try {
-
-    const { data } = await sb
+    const { data, error } = await sb
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .maybeSingle();
 
-    state.profile = data || null;
-
-
-    /*
-      Admin status is checked through the existing
-      Supabase RPC function.
-    */
-
-    try {
-
-      const result = await sb.rpc("is_admin");
-
-      state.isAdmin = result.data === true;
-
-    } catch (adminError) {
-
-      console.warn(
-        "Admin check unavailable:",
-        adminError
-      );
-
-      state.isAdmin = false;
+    if (error) {
+      console.warn("Profile read:", error);
     }
 
-
-    /*
-      Read XP from the profile if the column exists.
-      This is deliberately tolerant so the app does not
-      crash if the XP column has not been created yet.
-    */
+    state.profile = data || null;
 
     if (data) {
-
       state.studentXP = safeNumber(
         data.xp ??
         data.total_xp ??
@@ -273,140 +233,99 @@ async function loadUser(user) {
       );
     }
 
+    try {
+      const { data: adminData, error: adminError } =
+        await sb.rpc("is_admin");
 
-    state.rank =
-      window.getRank
-        ? window.getRank(state.studentXP)
-        : state.rank;
+      if (!adminError) {
+        state.isAdmin = adminData === true;
+      }
+    } catch (error) {
+      console.warn("Admin check failed:", error);
+    }
 
-
+    state.rank = window.getRank
+      ? window.getRank(state.studentXP)
+      : state.rank;
   } catch (error) {
-
-    console.warn(
-      "Could not load student profile:",
-      error
-    );
+    console.warn("Could not load profile:", error);
   }
 }
-
 
 /* =========================================================
    XP
    ========================================================= */
 
 async function addXP(amount, reason = "Learning") {
-
   if (!state.user) return false;
 
   amount = safeNumber(amount);
 
   if (amount <= 0) return false;
 
-
   const oldXP = state.studentXP;
-
   const newXP = oldXP + amount;
-
 
   state.studentXP = newXP;
 
-
-  if (window.getRank) {
-    state.rank = window.getRank(newXP);
-  }
-
-
-  /*
-    Try to save XP to Supabase.
-
-    We support several common profile-column names.
-    If the database does not yet contain one, the local
-    app still continues working.
-  */
+  state.rank = window.getRank
+    ? window.getRank(newXP)
+    : state.rank;
 
   try {
-
-    const updates = {
-      xp: newXP
-    };
-
     const { error } = await sb
       .from("profiles")
-      .update(updates)
+      .update({
+        xp: newXP
+      })
       .eq("id", state.user.id);
 
     if (error) {
-
       console.warn(
         "XP could not be saved:",
         error.message
       );
     }
-
   } catch (error) {
-
-    console.warn(
-      "XP save failed:",
-      error
-    );
+    console.warn("XP save failed:", error);
   }
 
+  if (window.getRankUpMessage) {
+    const rankChange =
+      window.getRankUpMessage(oldXP, newXP);
 
-  const rankChange =
-    window.getRankUpMessage
-      ? window.getRankUpMessage(oldXP, newXP)
-      : null;
-
-
-  if (rankChange) {
-
-    setTimeout(() => {
-
-      alert(
-        `${rankChange.title}\n\n${rankChange.message}`
-      );
-
-    }, 100);
+    if (rankChange) {
+      setTimeout(() => {
+        alert(
+          `${rankChange.title}\n\n${rankChange.message}`
+        );
+      }, 100);
+    }
   }
 
-
-  console.log(
-    `+${amount} XP — ${reason}`
-  );
-
+  console.log(`+${amount} XP — ${reason}`);
 
   return true;
 }
 
+/* Make XP available to quiz.js */
+window.addXP = addXP;
 
 /* =========================================================
    HEADER
    ========================================================= */
 
 function renderHeader() {
-
   const s = state.settings;
 
-
-  const rankHTML = state.user
+  const right = state.user
     ? `
       <span class="rank-mini">
         ${esc(state.rank.icon || "🌱")}
         ${esc(state.rank.name || "Beginners")}
       </span>
-    `
-    : "";
 
-
-  const right = state.user
-
-    ? `
-      ${rankHTML}
-
-      <button
-        class="btn ghost"
-        id="btn-profile"
-      >
+      <button class="btn ghost" id="btn-profile">
         👤 ${esc(
           state.profile?.name ||
           state.user.user_metadata?.name ||
@@ -414,160 +333,105 @@ function renderHeader() {
         )}
       </button>
 
-      <button
-        class="btn ghost"
-        id="btn-logout"
-      >
+      <button class="btn ghost" id="btn-logout">
         Log out
       </button>
     `
-
     : `
-      <button
-        class="btn primary"
-        id="btn-login"
-      >
+      <button class="btn primary" id="btn-login">
         Register / Login
       </button>
     `;
 
-
   $("#topbar").innerHTML = `
-
     <div class="bar">
 
-      <button
-        class="brand"
-        id="btn-home"
-      >
-
-        <span
-          class="logo"
-          id="logo"
-        >
-          🎓
-        </span>
+      <button class="brand" id="btn-home">
+        <span class="logo" id="logo">🎓</span>
 
         <span>
           ${esc(s.heroTitle)}
         </span>
-
       </button>
 
-
       <div class="row">
-
         ${right}
-
       </div>
 
     </div>
   `;
 
-
   if (s.logoUrl) {
-
     const logo = $("#logo");
 
     if (logo) {
-
       logo.textContent = "";
-
       logo.style.backgroundImage =
         `url("${s.logoUrl}")`;
-
       logo.style.backgroundSize = "cover";
-
       logo.style.backgroundPosition = "center";
     }
   }
 
-
   $("#btn-home").onclick =
     () => leaveTo("home");
 
-
   if (state.user) {
-
-    $("#btn-logout").onclick =
-      async () => {
-
-        await sb.auth.signOut();
-
-      };
-
+    $("#btn-logout").onclick = async () => {
+      await sb.auth.signOut();
+    };
 
     $("#btn-profile").onclick =
       () => go("profile");
-
   } else {
-
     $("#btn-login").onclick =
       () => openAuth("in");
-
   }
 }
-
 
 /* =========================================================
    HOME
    ========================================================= */
 
 function renderHome() {
-
   const s = state.settings;
 
-  const rank =
-    window.getRank
-      ? window.getRank(state.studentXP)
-      : state.rank;
+  const rank = window.getRank
+    ? window.getRank(state.studentXP)
+    : state.rank;
 
-
-  const progress =
-    window.getRankProgress
-      ? window.getRankProgress(state.studentXP)
-      : {
-          percentage: 0,
-          neededXP: 100
-        };
-
+  const progress = window.getRankProgress
+    ? window.getRankProgress(state.studentXP)
+    : {
+        percentage: 0,
+        neededXP: 100,
+        nextRank: "Intermediate"
+      };
 
   $("#app").innerHTML = `
-
     ${
       state.dbError
         ? `<p class="alert">${esc(state.dbError)}</p>`
         : ""
     }
 
+    <section class="hero" id="hero">
 
-    <section
-      class="hero"
-      id="hero"
-    >
-
-      <div
-        class="photo"
-        id="photo"
-      >
+      <div class="photo" id="photo">
         🎓
       </div>
-
 
       <h2 class="creator">
         ${esc(s.creator)}
       </h2>
 
-
       <p class="small">
         ${esc(s.school)}
       </p>
 
-
       <p class="small">
         ${esc(s.session)}
       </p>
-
 
       <a
         class="small link"
@@ -576,26 +440,21 @@ function renderHome() {
         ${esc(s.creatorEmail)}
       </a>
 
-
       <p class="levels">
         SS1 • SS2 • SS3
       </p>
-
 
       <h1>
         ${esc(s.heroTitle)}
       </h1>
 
-
       <p>
         ${esc(s.heroSubtitle)}
       </p>
 
-
       ${
         state.user
           ? `
-
             <div class="rank-card">
 
               <div class="rank-icon">
@@ -603,7 +462,6 @@ function renderHome() {
               </div>
 
               <div>
-
                 <strong>
                   ${esc(rank.name)}
                 </strong>
@@ -611,29 +469,30 @@ function renderHome() {
                 <div class="small">
                   ${state.studentXP} XP
                 </div>
-
               </div>
 
             </div>
 
-
             <div class="rank-progress">
-
               <div
                 class="rank-progress-bar"
-                style="width:${Math.round(
-                  progress.percentage || 0
+                style="width:${Math.min(
+                  100,
+                  Math.max(
+                    0,
+                    Math.round(
+                      progress.percentage || 0
+                    )
+                  )
                 )}%"
               ></div>
-
             </div>
-
 
             ${
               progress.nextRank
                 ? `
                   <p class="small">
-                    ${progress.neededXP} XP to
+                    ${progress.neededXP || 0} XP to
                     ${esc(progress.nextRank)}
                   </p>
                 `
@@ -643,11 +502,9 @@ function renderHome() {
                   </p>
                 `
             }
-
           `
           : ""
       }
-
 
       ${
         state.isAdmin
@@ -664,94 +521,49 @@ function renderHome() {
 
     </section>
 
-
     <section class="card">
 
-      <h2>
-        Study tools
-      </h2>
-
+      <h2>Study tools</h2>
 
       <div class="tiles">
 
-        <button
-          class="tile"
-          id="tile-quiz"
-        >
-          <b>
-            📝 Practice & Exam
-          </b>
-
+        <button class="tile" id="tile-quiz">
+          <b>📝 Practice & Exam</b>
           <span>
             Quizzes by subject, class and topic
           </span>
         </button>
 
-
-        <button
-          class="tile"
-          id="tile-notes"
-        >
-          <b>
-            📒 Notes
-          </b>
-
+        <button class="tile" id="tile-notes">
+          <b>📒 Notes</b>
           <span>
             Learn every topic with detailed notes
           </span>
         </button>
 
-
-        <button
-          class="tile"
-          id="tile-formulas"
-        >
-          <b>
-            📐 Formula Library
-          </b>
-
+        <button class="tile" id="tile-formulas">
+          <b>📐 Formula Library</b>
           <span>
             Important formulas and rules
           </span>
         </button>
 
-
-        <button
-          class="tile"
-          id="tile-papers"
-        >
-          <b>
-            📚 WAEC Past Papers
-          </b>
-
+        <button class="tile" id="tile-papers">
+          <b>📚 WAEC Past Papers</b>
           <span>
             Browse past questions by year
           </span>
         </button>
 
-
-        <button
-          class="tile"
-          id="tile-leaderboard"
-        >
-          <b>
-            🏆 Leaderboard
-          </b>
-
+        <button class="tile" id="tile-leaderboard">
+          <b>🏆 Leaderboard</b>
           <span>
             See students and ranks
           </span>
         </button>
 
-
-        <button
-          class="tile"
-          id="tile-friends"
-        >
-          <b>
-            👥 Friends & Community
-          </b>
-
+        <button class="tile" id="tile-friends">
+          <b>👥 Friends & Community</b>
           <span>
             Connect, ask and discuss
           </span>
@@ -761,12 +573,9 @@ function renderHome() {
 
     </section>
 
-
     <section class="card">
 
-      <h2>
-        Your learning
-      </h2>
+      <h2>Your learning</h2>
 
       <div class="stats-grid">
 
@@ -794,7 +603,6 @@ function renderHome() {
 
     </section>
 
-
     <section class="card center">
 
       <p class="eyebrow">
@@ -804,7 +612,6 @@ function renderHome() {
       <h2>
         We launch on 10 November 2026
       </h2>
-
 
       <div class="cd">
 
@@ -830,22 +637,15 @@ function renderHome() {
 
       </div>
 
-
-      <p
-        class="muted small"
-        id="cd-note"
-      ></p>
+      <p class="muted small" id="cd-note"></p>
 
     </section>
   `;
 
-
   if (s.bgUrl) {
-
     const hero = $("#hero");
 
     if (hero) {
-
       hero.style.backgroundImage =
         `linear-gradient(
           125deg,
@@ -856,36 +656,27 @@ function renderHome() {
     }
   }
 
-
   if (s.photoUrl) {
-
     const img = new Image();
 
     img.alt = "Admin portrait";
 
-
     img.onload = () => {
-
       const photo = $("#photo");
 
       if (!photo) return;
 
       photo.textContent = "";
-
       photo.appendChild(img);
     };
-
 
     img.src = s.photoUrl;
   }
 
-
   if (state.isAdmin) {
-
     $("#btn-custom").onclick =
       openCustomize;
   }
-
 
   $("#tile-quiz").onclick =
     () => go("quiz");
@@ -905,81 +696,58 @@ function renderHome() {
   $("#tile-friends").onclick =
     () => go("friends");
 
-
   startCountdown();
 }
-
 
 /* =========================================================
    COUNTDOWN
    ========================================================= */
 
 function startCountdown() {
-
   clearInterval(countdownTimer);
 
-
   const tick = () => {
+    const days = $("#cd-d");
 
-    if (!$("#cd-d")) {
-
+    if (!days) {
       clearInterval(countdownTimer);
-
       return;
     }
-
 
     const launchDate =
       window.LAUNCH_DATE ||
       "2026-11-10T00:00:00+01:00";
-
 
     const ms = Math.max(
       0,
       Date.parse(launchDate) - Date.now()
     );
 
-
     const parts = {
-
-      d: Math.floor(
-        ms / 864e5
-      ),
-
+      d: Math.floor(ms / 864e5),
       h: Math.floor(
         (ms % 864e5) / 36e5
       ),
-
       m: Math.floor(
         (ms % 36e5) / 6e4
       ),
-
       s: Math.floor(
         (ms % 6e4) / 1e3
       )
     };
 
-
     for (const key in parts) {
-
-      const el =
-        $("#cd-" + key);
+      const el = $(`#cd-${key}`);
 
       if (el) {
-
         el.textContent =
-          String(parts[key])
-            .padStart(2, "0");
+          String(parts[key]).padStart(2, "0");
       }
     }
 
-
-    const note =
-      $("#cd-note");
-
+    const note = $("#cd-note");
 
     if (note) {
-
       note.textContent =
         ms === 0
           ? "Launch day is here! 🎉"
@@ -987,33 +755,23 @@ function startCountdown() {
     }
   };
 
-
   tick();
 
   countdownTimer =
-    setInterval(
-      tick,
-      1000
-    );
+    setInterval(tick, 1000);
 }
-
 
 /* =========================================================
    MODAL
    ========================================================= */
 
 function modal(html) {
-
   const wrap =
     document.createElement("div");
 
-
-  wrap.className =
-    "overlay";
-
+  wrap.className = "overlay";
 
   wrap.innerHTML = `
-
     <div class="sheet">
 
       <button
@@ -1028,44 +786,35 @@ function modal(html) {
     </div>
   `;
 
-
   wrap.addEventListener(
     "click",
-    (event) => {
-
+    event => {
       if (event.target === wrap) {
         wrap.remove();
       }
-
     }
   );
 
+  const close = $(".x", wrap);
 
-  $(".x", wrap).onclick =
-    () => wrap.remove();
+  if (close) {
+    close.onclick =
+      () => wrap.remove();
+  }
 
-
-  document.body.appendChild(
-    wrap
-  );
-
+  document.body.appendChild(wrap);
 
   return wrap;
 }
-
 
 /* =========================================================
    AUTHENTICATION
    ========================================================= */
 
-function openAuth(mode) {
-
-  const isLogin =
-    mode === "in";
-
+function openAuth(mode = "in") {
+  const isLogin = mode === "in";
 
   const m = modal(`
-
     <h2>
       ${
         isLogin
@@ -1074,11 +823,7 @@ function openAuth(mode) {
       }
     </h2>
 
-
-    <form
-      id="auth-form"
-      class="stack"
-    >
+    <form id="auth-form" class="stack">
 
       ${
         isLogin
@@ -1097,7 +842,6 @@ function openAuth(mode) {
           `
       }
 
-
       <label>
         Email
 
@@ -1108,7 +852,6 @@ function openAuth(mode) {
           autocomplete="email"
         >
       </label>
-
 
       <label>
         Password
@@ -1126,17 +869,16 @@ function openAuth(mode) {
         >
       </label>
 
-
       <p
         class="alert"
         id="a-msg"
         hidden
       ></p>
 
-
       <button
         class="btn primary wide"
         id="a-go"
+        type="submit"
       >
         ${
           isLogin
@@ -1146,7 +888,6 @@ function openAuth(mode) {
       </button>
 
     </form>
-
 
     <p class="small center">
 
@@ -1159,6 +900,7 @@ function openAuth(mode) {
       <button
         class="linkbtn"
         id="a-switch"
+        type="button"
       >
         ${
           isLogin
@@ -1170,124 +912,134 @@ function openAuth(mode) {
     </p>
   `);
 
-
-  $("#a-switch", m).onclick =
-    () => {
-
-      m.remove();
-
-      openAuth(
-        isLogin
-          ? "up"
-          : "in"
-      );
-    };
-
+  $("#a-switch", m).onclick = () => {
+    m.remove();
+    openAuth(isLogin ? "up" : "in");
+  };
 
   $("#auth-form", m).onsubmit =
-    async (event) => {
-
+    async event => {
       event.preventDefault();
 
-
-      const msg =
-        $("#a-msg", m);
-
-      const btn =
-        $("#a-go", m);
-
+      const msg = $("#a-msg", m);
+      const btn = $("#a-go", m);
 
       const email =
-        $("#a-email", m)
-          .value
-          .trim();
-
+        $("#a-email", m).value.trim();
 
       const password =
-        $("#a-pass", m)
-          .value;
-
+        $("#a-pass", m).value;
 
       btn.disabled = true;
-
       msg.hidden = true;
-
 
       let result;
 
-
-      if (isLogin) {
-
-        result =
-          await sb.auth
-            .signInWithPassword({
+      try {
+        if (isLogin) {
+          result =
+            await sb.auth.signInWithPassword({
               email,
               password
             });
+        } else {
+          const name =
+            $("#a-name", m).value.trim();
 
-      } else {
-
-        const name =
-          $("#a-name", m)
-            .value
-            .trim();
-
-
-        result =
-          await sb.auth
-            .signUp({
-
+          result =
+            await sb.auth.signUp({
               email,
-
               password,
-
               options: {
                 data: {
                   name
                 }
               }
-
             });
+        }
+      } catch (error) {
+        result = {
+          error
+        };
       }
-
 
       btn.disabled = false;
 
-
-      if (result.error) {
-
+      if (result?.error) {
         msg.textContent =
           result.error.message;
 
         msg.hidden = false;
-
         return;
       }
 
-
-      if (!result.data.session) {
-
+      if (!result?.data?.session) {
         msg.textContent =
           "Check your email to confirm your account, then log in.";
 
         msg.hidden = false;
-
         return;
       }
-
 
       m.remove();
     };
 }
 
-
 /* =========================================================
-   ADMIN IMAGE COMPRESSION
+   ADMIN IMAGE HELPERS
    ========================================================= */
 
-function shrink(file, max) {
-
+function fileToDataURL(file) {
   return new Promise(
     (resolve, reject) => {
+      const reader =
+        new FileReader();
 
-      const
+      reader.onload = () =>
+        resolve(reader.result);
+
+      reader.onerror = reject;
+
+      reader.readAsDataURL(file);
+    }
+  );
+}
+
+async function uploadAdminFile(file, filename) {
+  if (!file) return "";
+
+  const safeName =
+    String(filename || file.name)
+      .replace(/[^a-zA-Z0-9._-]/g, "_");
+
+  const path =
+    `admin/${Date.now()}_${safeName}`;
+
+  const { error } =
+    await sb.storage
+      .from("site-assets")
+      .upload(path, file, {
+        upsert: true,
+        contentType: file.type
+      });
+
+  if (error) {
+    throw error;
+  }
+
+  const { data } =
+    sb.storage
+      .from("site-assets")
+      .getPublicUrl(path);
+
+  return data.publicUrl;
+}
+
+/* =========================================================
+   ADMIN CUSTOMIZATION
+   ========================================================= */
+
+function openCustomize() {
+  if (!state.isAdmin) {
+    alert("Admin access required.");
+
